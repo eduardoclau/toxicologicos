@@ -2,11 +2,10 @@ import streamlit as st
 import pandas as pd
 import io
 
-
 st.set_page_config(page_title="Filtro de Empregados", layout="wide")
-st.title("🔍 FERRAMENTA PARA CONTROLE DE TOXICOLÓGICOS")
+st.title("🔍 Filtro de Empregados por Cidade e Cargo")
 
-# Função para processar a planilha
+# Função para processar a planilha e aplicar filtros
 def carregar_dados_com_filtro(arquivo, cidades=None, cargo=None):
     xls = pd.ExcelFile(arquivo)
     df = xls.parse(xls.sheet_names[0], header=None)
@@ -74,23 +73,30 @@ if arquivo:
 
             st.markdown(f"### 📋 Resultado ({len(df_filtrado)} registros encontrados)")
 
-            colunas_exibidas = ["empresa", "Empregado", "CPF", "Data Nascimento", "Cargo", "Cidade de Atuação"]
+            colunas_exibidas = [
+                "empresa",
+                "Empregado",
+                "CPF",
+                "Data Nascimento",
+                "Cargo",
+                "Cidade de Atuação"
+            ]
+
             st.dataframe(df_filtrado[colunas_exibidas])
 
-            # Exportar para Excel
+            # Exportar como Excel
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df_filtrado[colunas_exibidas].to_excel(writer, index=False, sheet_name='Empregados Filtrados')
-            writer.save()
-            output.seek(0)
-            
+                df_filtrado[colunas_exibidas].to_excel(writer, index=False, sheet_name='Empregados Filtrados')
+                writer.save()
+                output.seek(0)
+
             st.download_button(
                 label="📥 Baixar Excel com resultado",
                 data=output,
                 file_name="empregados_filtrados.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-)
 
     except Exception as e:
         st.error(f"Erro ao processar o arquivo: {e}")
