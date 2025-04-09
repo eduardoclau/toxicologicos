@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 
 st.set_page_config(page_title="Filtro de Empregados", layout="wide")
-st.title("🔍 Filtro de Empregados por Cidade e Cargo")
+st.title("🔍 FERRAMENTA PARA CONTROLE DE TOXICOLÓGICOS")
 
 # Função para processar a planilha
-def carregar_dados_com_filtro(arquivo, cidade=None, cargo=None):
+def carregar_dados_com_filtro(arquivo, cidades=None, cargo=None):
     xls = pd.ExcelFile(arquivo)
     df = xls.parse(xls.sheet_names[0], header=None)
 
@@ -30,14 +30,14 @@ def carregar_dados_com_filtro(arquivo, cidade=None, cargo=None):
             start_idx = idx + 1
 
     if not dataframes:
-        return pd.DataFrame()  # retorna vazio se não houver dados
+        return pd.DataFrame()
 
     df_final = pd.concat(dataframes, ignore_index=True)
 
     # Aplica filtros
-    if cidade:
+    if cidades:
         df_final = df_final[
-            df_final["Cidade de Atuação"].str.contains(cidade, case=False, na=False)
+            df_final["Cidade de Atuação"].str.upper().isin([c.upper() for c in cidades])
         ]
     if cargo:
         df_final = df_final[
@@ -59,19 +59,24 @@ if arquivo:
             cidades = sorted(df_completo["Cidade de Atuação"].dropna().unique())
             cargos = sorted(df_completo["Cargo"].dropna().unique())
 
-            # Seletores
-            cidade_sel = st.selectbox("🌆 Selecione a Cidade de Atuação", [""] + cidades)
+            # Filtros
+            cidades_sel = st.multiselect("🌆 Selecione uma ou mais Cidades", cidades)
             cargo_sel = st.selectbox("💼 Selecione o Cargo", [""] + cargos)
 
-            # Filtrando com base na seleção
-            df_filtrado = carregar_dados_com_filtro(arquivo, cidade=cidade_sel if cidade_sel else None,
-                                                    cargo=cargo_sel if cargo_sel else None)
+            # Aplica os filtros
+            df_filtrado = carregar_dados_com_filtro(
+                arquivo,
+                cidades=cidades_sel if cidades_sel else None,
+                cargo=cargo_sel if cargo_sel else None
+            )
 
             st.markdown(f"### 📋 Resultado ({len(df_filtrado)} registros encontrados)")
-            st.dataframe(df_filtrado[["empresa", "Empregado", "Cargo", "Cidade de Atuação"]])
 
-            # Botão para baixar resultado
-            csv = df_filtrado.to_csv(index=False).encode('utf-8')
+            colunas_exibidas = ["empresa", "Empregado", "CPF", "Data Nascimento", "Cargo", "Cidade de Atuação"]
+            st.dataframe(df_filtrado[colunas_exibidas])
+
+            # Exportar CSV
+            csv = df_filtrado[colunas_exibidas].to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 Baixar CSV com resultado",
                 data=csv,
