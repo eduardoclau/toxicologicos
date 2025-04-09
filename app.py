@@ -88,7 +88,6 @@ if arquivo:
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df_filtrado[colunas_exibidas].to_excel(writer, index=False, sheet_name='Empregados Filtrados')
-                writer.save()
                 output.seek(0)
 
             st.download_button(
