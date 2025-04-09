@@ -90,7 +90,7 @@ if arquivo:
                 file_name="empregados_filtrados.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-            )
+)
 
     except Exception as e:
         st.error(f"Erro ao processar o arquivo: {e}")
