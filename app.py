@@ -6,7 +6,7 @@ st.set_page_config(page_title="Filtro de Empregados", layout="wide")
 st.title("🔍 Filtro de Empregados por Cidade e Cargo")
 
 # Função para processar a planilha e aplicar filtros
-def carregar_dados_com_filtro(arquivo, cidades=None, cargo=None):
+def carregar_dados_com_filtro(arquivo, cidades=None, cargos=None):
     xls = pd.ExcelFile(arquivo)
     df = xls.parse(xls.sheet_names[0], header=None)
 
@@ -40,9 +40,9 @@ def carregar_dados_com_filtro(arquivo, cidades=None, cargo=None):
         df_final = df_final[
             df_final["Cidade de Atuação"].str.upper().isin([c.upper() for c in cidades])
         ]
-    if cargo:
+    if cargos:
         df_final = df_final[
-            df_final["Cargo"].str.contains(cargo, case=False, na=False)
+            df_final["Cargo"].str.upper().isin([c.upper() for c in cargos])
         ]
 
     return df_final
@@ -62,13 +62,13 @@ if arquivo:
 
             # Filtros
             cidades_sel = st.multiselect("🌆 Selecione uma ou mais Cidades", cidades)
-            cargo_sel = st.selectbox("💼 Selecione o Cargo", [""] + cargos)
+            cargos_sel = st.multiselect("💼 Selecione um ou mais Cargos", cargos)
 
             # Aplica os filtros
             df_filtrado = carregar_dados_com_filtro(
                 arquivo,
                 cidades=cidades_sel if cidades_sel else None,
-                cargo=cargo_sel if cargo_sel else None
+                cargos=cargos_sel if cargos_sel else None
             )
 
             st.markdown(f"### 📋 Resultado ({len(df_filtrado)} registros encontrados)")
@@ -88,7 +88,7 @@ if arquivo:
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df_filtrado[colunas_exibidas].to_excel(writer, index=False, sheet_name='Empregados Filtrados')
-                output.seek(0)
+            output.seek(0)
 
             st.download_button(
                 label="📥 Baixar Excel com resultado",
