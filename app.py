@@ -77,27 +77,19 @@ if arquivo:
             colunas_exibidas = ["empresa", "Empregado", "CPF", "Data Nascimento", "Cargo", "Cidade de Atuação"]
             st.dataframe(df_filtrado[colunas_exibidas])
 
-            # Exportar CSV
-            csv = df_filtrado[colunas_exibidas].to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="📥 Baixar CSV com resultado",
-                data=csv,
-                file_name="empregados_filtrados.csv",
-                mime="text/csv"
-
-            # Cria um arquivo Excel em memória
+            # Exportar para Excel
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df_filtrado[colunas_exibidas].to_excel(writer, index=False, sheet_name='Empregados Filtrados')
             writer.save()
             output.seek(0)
-
-        st.download_button(
-            label="📥 Baixar Excel com resultado",
-            data=output,
-            file_name="empregados_filtrados.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+            
+            st.download_button(
+                label="📥 Baixar Excel com resultado",
+                data=output,
+                file_name="empregados_filtrados.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
             )
 
     except Exception as e:
