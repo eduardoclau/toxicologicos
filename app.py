@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import io
+
 
 st.set_page_config(page_title="Filtro de Empregados", layout="wide")
 st.title("🔍 FERRAMENTA PARA CONTROLE DE TOXICOLÓGICOS")
@@ -82,6 +84,20 @@ if arquivo:
                 data=csv,
                 file_name="empregados_filtrados.csv",
                 mime="text/csv"
+
+            # Cria um arquivo Excel em memória
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df_filtrado[colunas_exibidas].to_excel(writer, index=False, sheet_name='Empregados Filtrados')
+            writer.save()
+            output.seek(0)
+
+        st.download_button(
+            label="📥 Baixar Excel com resultado",
+            data=output,
+            file_name="empregados_filtrados.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
             )
 
     except Exception as e:
